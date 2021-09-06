@@ -20,9 +20,22 @@ jobs:
               docker build -f ${tag}/Dockerfile . -t gunosy/ci-git-pr-release:${tag}
               docker push gunosy/ci-git-pr-release:${tag}
             done
+  build:
+    executor: docker
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and push docker image
+          command: |
+            for tag in $( find . -follow -name Dockerfile | sed "s/^.\/\(.*\)\/Dockerfile/\1/g" ); do
+              docker build -f ${tag}/Dockerfile . -t gunosy/ci-git-pr-release:${tag}
+            done
+
 workflows:
   build:
     jobs:
+      - build
       - build_and_push:
           context: gunosy-dockerhub-user
           filters:
